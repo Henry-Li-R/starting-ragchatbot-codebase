@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
     createNewSession();
     loadCourseStats();
+    document.getElementById('newChatBtn').addEventListener('click', startNewChat);
 });
 
 // Event Listeners
@@ -155,6 +156,13 @@ async function createNewSession() {
     currentSessionId = null;
     chatMessages.innerHTML = '';
     addMessage('Welcome to the Course Materials Assistant! I can help you with questions about courses, lessons and specific content. What would you like to know?', 'assistant', null, true);
+}
+
+async function startNewChat() {
+    if (currentSessionId) {
+        fetch(`${API_URL}/session/${currentSessionId}`, { method: 'DELETE' }).catch(() => {});
+    }
+    createNewSession();
 }
 
 // Load course statistics
