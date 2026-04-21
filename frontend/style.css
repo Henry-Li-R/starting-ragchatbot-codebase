@@ -245,6 +245,20 @@ header h1 {
     color: var(--text-secondary);
 }
 
+.sources-content a,
+.sources-content a:visited {
+    color: #f1f5f9;
+    background-color: rgba(37, 99, 235, 0.35);
+    border-radius: 4px;
+    padding: 1px 5px;
+    text-decoration: none;
+}
+
+.sources-content a:hover,
+.sources-content a:visited:hover {
+    background-color: rgba(37, 99, 235, 0.6);
+}
+
 /* Markdown formatting styles */
 .message-content h1,
 .message-content h2,

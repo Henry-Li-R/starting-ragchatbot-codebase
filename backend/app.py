@@ -40,10 +40,14 @@ class QueryRequest(BaseModel):
     query: str
     session_id: Optional[str] = None
 
+class Source(BaseModel):
+    label: str
+    url: Optional[str] = None
+
 class QueryResponse(BaseModel):
     """Response model for course queries"""
     answer: str
-    sources: List[str]
+    sources: List[Source]
     session_id: str
 
 class CourseStats(BaseModel):
@@ -63,8 +67,9 @@ async def query_documents(request: QueryRequest):
             session_id = rag_system.session_manager.create_session()
         
         # Process query using RAG system
-        answer, sources = rag_system.query(request.query, session_id)
-        
+        answer, raw_sources = rag_system.query(request.query, session_id)
+        sources = [Source(**s) if isinstance(s, dict) else Source(label=s) for s in raw_sources]
+
         return QueryResponse(
             answer=answer,
             sources=sources,
