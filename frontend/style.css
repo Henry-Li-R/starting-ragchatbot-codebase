@@ -326,6 +326,17 @@ header h1 {
     position: relative;
 }
 
+.message-content a,
+.message-content a:visited {
+    color: #60a5fa;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.message-content a:hover {
+    color: #93c5fd;
+}
+
 .message-content strong {
     font-weight: 600;
 }
