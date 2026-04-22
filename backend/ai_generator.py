@@ -8,10 +8,12 @@ class AIGenerator:
     SYSTEM_PROMPT = """ You are an AI assistant specialized in course materials and educational content with access to a comprehensive search tool for course information.
 
 Search Tool Usage:
-- **One tool call per query maximum**
+- You may make up to 2 sequential tool calls when needed (one per API round)
+- Make one tool call at a time — do not call multiple tools simultaneously
+- Use a second tool call only if the first result reveals you need more information
 - Use `get_course_outline` for questions about a course's structure, outline, syllabus, or lesson list
 - Use `search_course_content` for questions about specific content, concepts, or details within lessons
-- Synthesize tool results into accurate, fact-based responses
+- Synthesize all tool results into accurate, fact-based responses
 - If a tool yields no results, state this clearly without offering alternatives
 
 Response Protocol:
@@ -84,54 +86,80 @@ Provide only the direct answer to what was asked.
         # Handle tool execution if needed
         if response.stop_reason == "tool_use" and tool_manager:
             return self._handle_tool_execution(response, api_params, tool_manager)
-        
+
+        # Safety: if tool_use fired but no tool_manager, find any text block rather than crashing
+        if response.stop_reason == "tool_use":
+            for block in response.content:
+                if hasattr(block, "text"):
+                    return block.text
+            return ""
+
         # Return direct response
         return response.content[0].text
-    
+
+    # Maximum number of sequential tool-calling rounds per query
+    MAX_TOOL_ROUNDS = 2
+
     def _handle_tool_execution(self, initial_response, base_params: Dict[str, Any], tool_manager):
         """
-        Handle execution of tool calls and get follow-up response.
-        
-        Args:
-            initial_response: The response containing tool use requests
-            base_params: Base API parameters
-            tool_manager: Manager to execute tools
-            
-        Returns:
-            Final response text after tool execution
+        Execute up to MAX_TOOL_ROUNDS sequential tool-calling rounds.
+
+        Round N: execute tools → inject results → call API with tools still present.
+        If Claude answers with text during an intermediate call, return immediately.
+        After all rounds (or on tool error), make one final synthesis call without tools.
         """
-        # Start with existing messages
         messages = base_params["messages"].copy()
-        
-        # Add AI's tool use response
         messages.append({"role": "assistant", "content": initial_response.content})
-        
-        # Execute all tool calls and collect results
-        tool_results = []
-        for content_block in initial_response.content:
-            if content_block.type == "tool_use":
-                tool_result = tool_manager.execute_tool(
-                    content_block.name, 
-                    **content_block.input
-                )
-                
-                tool_results.append({
-                    "type": "tool_result",
-                    "tool_use_id": content_block.id,
-                    "content": tool_result
-                })
-        
-        # Add tool results as single message
-        if tool_results:
+        current_response = initial_response
+
+        for round_num in range(self.MAX_TOOL_ROUNDS):
+
+            # Execute every tool_use block in the current response
+            tool_results = []
+            error_occurred = False
+            for block in current_response.content:
+                if block.type == "tool_use":
+                    try:
+                        result = tool_manager.execute_tool(block.name, **block.input)
+                    except Exception as e:
+                        result = f"Tool error: {e}"
+                        error_occurred = True
+                    tool_results.append({
+                        "type": "tool_result",
+                        "tool_use_id": block.id,
+                        "content": result,
+                    })
+                    if error_occurred:
+                        break
+
             messages.append({"role": "user", "content": tool_results})
-        
-        # Prepare final API call without tools
+
+            # After the last allowed round or on error, fall through to synthesis
+            if round_num == self.MAX_TOOL_ROUNDS - 1 or error_occurred:
+                break
+
+            # Intermediate call: tools still present so Claude can chain a second call
+            next_params = {
+                **self.base_params,
+                "messages": messages,
+                "system": base_params["system"],
+                "tools": base_params["tools"],
+                "tool_choice": {"type": "auto"},
+            }
+            next_response = self.client.messages.create(**next_params)
+
+            # Claude answered with text — no synthesis call needed
+            if next_response.stop_reason != "tool_use":
+                return next_response.content[0].text
+
+            messages.append({"role": "assistant", "content": next_response.content})
+            current_response = next_response
+
+        # Final synthesis call — tools removed so Claude writes the answer
         final_params = {
             **self.base_params,
             "messages": messages,
-            "system": base_params["system"]
+            "system": base_params["system"],
         }
-        
-        # Get final response
         final_response = self.client.messages.create(**final_params)
         return final_response.content[0].text
