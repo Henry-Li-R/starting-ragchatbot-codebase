@@ -31,3 +31,7 @@ uploads/
 Thumbs.db
 
 .playwright-mcp
+
+# Frontend node dependencies
+frontend/node_modules/
+frontend/package-lock.json
