@@ -22,6 +22,43 @@
     --focus-ring: rgba(37, 99, 235, 0.2);
     --welcome-bg: #1e3a5f;
     --welcome-border: #2563eb;
+    --link-color: #60a5fa;
+    --link-hover: #93c5fd;
+    --source-link-color: #f1f5f9;
+    --source-link-bg: rgba(37, 99, 235, 0.35);
+    --source-link-bg-hover: rgba(37, 99, 235, 0.6);
+    --code-bg: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] {
+    --primary-color: #2563eb;
+    --primary-hover: #1d4ed8;
+    --background: #f8fafc;
+    --surface: #ffffff;
+    --surface-hover: #f1f5f9;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --border-color: #e2e8f0;
+    --user-message: #2563eb;
+    --assistant-message: #f1f5f9;
+    --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --radius: 12px;
+    --focus-ring: rgba(37, 99, 235, 0.2);
+    --welcome-bg: #eff6ff;
+    --welcome-border: #2563eb;
+    --link-color: #2563eb;
+    --link-hover: #1d4ed8;
+    --source-link-color: #1e293b;
+    --source-link-bg: rgba(37, 99, 235, 0.12);
+    --source-link-bg-hover: rgba(37, 99, 235, 0.25);
+    --code-bg: rgba(0, 0, 0, 0.06);
+}
+
+/* Smooth theme transitions */
+html.theme-transitioning *,
+html.theme-transitioning *::before,
+html.theme-transitioning *::after {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease !important;
 }
 
 /* Base Styles */
@@ -247,8 +284,8 @@ header h1 {
 
 .sources-content a,
 .sources-content a:visited {
-    color: #f1f5f9;
-    background-color: rgba(37, 99, 235, 0.35);
+    color: var(--source-link-color);
+    background-color: var(--source-link-bg);
     border-radius: 4px;
     padding: 1px 5px;
     text-decoration: none;
@@ -256,7 +293,7 @@ header h1 {
 
 .sources-content a:hover,
 .sources-content a:visited:hover {
-    background-color: rgba(37, 99, 235, 0.6);
+    background-color: var(--source-link-bg-hover);
 }
 
 /* Markdown formatting styles */
@@ -291,7 +328,7 @@ header h1 {
 }
 
 .message-content code {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: var(--code-bg);
     padding: 0.125rem 0.25rem;
     border-radius: 3px;
     font-family: 'Fira Code', 'Consolas', monospace;
@@ -299,7 +336,7 @@ header h1 {
 }
 
 .message-content pre {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: var(--code-bg);
     padding: 0.75rem;
     border-radius: 4px;
     overflow-x: auto;
@@ -328,13 +365,13 @@ header h1 {
 
 .message-content a,
 .message-content a:visited {
-    color: #60a5fa;
+    color: var(--link-color);
     text-decoration: underline;
     text-underline-offset: 2px;
 }
 
 .message-content a:hover {
-    color: #93c5fd;
+    color: var(--link-hover);
 }
 
 .message-content strong {
@@ -768,4 +805,52 @@ details[open] .suggested-header::before {
     .sidebar {
         width: 280px;
     }
+}
+
+/* Theme Toggle Button */
+.theme-toggle {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 100;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow);
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.theme-toggle:hover {
+    color: var(--primary-color);
+    background: var(--surface-hover);
+    transform: scale(1.08);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+}
+
+.theme-toggle:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px var(--focus-ring);
+}
+
+.theme-toggle:active {
+    transform: scale(0.96);
+}
+
+.icon-moon {
+    display: none;
+}
+
+[data-theme="light"] .icon-sun {
+    display: none;
+}
+
+[data-theme="light"] .icon-moon {
+    display: block;
 }
