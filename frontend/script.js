@@ -9,17 +9,17 @@ let chatMessages, chatInput, sendButton, totalCourses, courseTitles;
 
 // Theme toggle
 function toggleTheme() {
-    const html = document.documentElement;
-    html.classList.add('theme-transitioning');
-    const isLight = html.getAttribute('data-theme') === 'light';
-    if (isLight) {
-        html.removeAttribute('data-theme');
-        localStorage.setItem('theme', 'dark');
-    } else {
-        html.setAttribute('data-theme', 'light');
-        localStorage.setItem('theme', 'light');
-    }
-    setTimeout(() => html.classList.remove('theme-transitioning'), 300);
+  const html = document.documentElement;
+  html.classList.add("theme-transitioning");
+  const isLight = html.getAttribute("data-theme") === "light";
+  if (isLight) {
+    html.removeAttribute("data-theme");
+    localStorage.setItem("theme", "dark");
+  } else {
+    html.setAttribute("data-theme", "light");
+    localStorage.setItem("theme", "light");
+  }
+  setTimeout(() => html.classList.remove("theme-transitioning"), 300);
 }
 
 // Initialize
