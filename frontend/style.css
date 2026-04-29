@@ -568,6 +568,17 @@ details[open] .suggested-header::before {
   transform: rotate(90deg);
 }
 
+/* Sidebar Title Header */
+.sidebar-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 0.5rem 0;
+  margin-bottom: 1rem;
+}
+
 /* New Chat Button */
 .new-chat-btn {
   appearance: none;
